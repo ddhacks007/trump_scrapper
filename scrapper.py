@@ -6,6 +6,8 @@ import math
 import numpy as np
 import datetime
 
+month_names = None
+
 def scrap_it(url_name):
     url = url_name
     html = urllib.request.urlopen(url).read().decode('utf-8')
@@ -47,7 +49,7 @@ def check_if_month(text):
             return True
     return False
 
-def month_exists(iterable, index, text, threshold = 2):
+def month_exists(iterable, index, threshold = 2):
     for i in range(index-1, index-threshold-1, -1):
         if(i>=0 and check_if_month(iterable[i])):
             return True
@@ -55,7 +57,15 @@ def month_exists(iterable, index, text, threshold = 2):
         if(i<= len(iterable)-1 and check_if_month(iterable[i])):
             return True
     return False
-    
+
+def year_exists(iterable, index, threshold = 2):
+    for i in range(index-1, index-threshold-1, -1):
+        if(i>=0 and check_if_year(iterable[i], i, iterable)):
+            return True
+    for i in range(index+1, index+threshold+1):
+        if(i<= len(iterable)-1 and check_if_year(iterable[i], i, iterable)):
+            return True
+    return False
 
 def update_month_names(init_dict, month_name):
     if(month_name in init_dict['no_of_times_year_month_day']['month'].keys()):
@@ -70,7 +80,9 @@ def check_if_year(text, index, iterable, min_year_threshold = 1000, max_year_thr
         if((text[-1] == 's' and text[:-1].isdigit())):
             text = text[:-1]
         if(text.isdigit()):
-            if ( (int(text)>=min_year_threshold and int(text) <= max_year_threshold) and (month_exists(iterable, index, text)) ):
+            if ( (int(text)>=min_year_threshold and int(text) <= max_year_threshold) and (month_exists(iterable, index)) ):
+                return True
+            if (iterable[index-1] == 'in'):
                 return True
         return False
     except:
@@ -83,10 +95,9 @@ def update_year(init_dict, year):
         return
     init_dict['no_of_times_year_month_day']['year'][year] = 1
 
-def check_if_day(day, previous_ptr, next_ptr, iterable):
+def check_if_day(day, index, iterable):
     if day > 0 and day<=31:
-        if check_if_year(iterable[next_ptr], next_ptr, iterable) | check_if_year(iterable[previous_ptr], previous_ptr, iterable) | check_if_month(iterable[next_ptr]) | check_if_month(iterable[previous_ptr]) : 
-            print(iterable[next_ptr], 'prev', iterable[previous_ptr], 'day', day)
+        if year_exists(iterable, index) | month_exists(iterable, index): 
             return True
     return False
 
@@ -97,7 +108,6 @@ def update_day(init_dict, day):
     init_dict['no_of_times_year_month_day']['day'][day] = 1
 
 def calculate_params(init_dict, text, index, iterable):
-    is_day_flag = 0
     update_word_count_index(init_dict, text)
     if(check_word_exists(text, 'trump')):
         update_requested_word_index(init_dict)
@@ -108,17 +118,9 @@ def calculate_params(init_dict, text, index, iterable):
         update_year(init_dict, int(text))
         return
     if text.isdigit():
-        if(index == 0):
-            if(check_if_day(int(text), index+1, index+2, iterable)):
-                is_day_flag = 1   
-        elif(index == len(iterable) -1):
-            if(check_if_day(int(text), index-1, index-2, iterable)):
-                is_day_flag = 1
-        else:
-            if(check_if_day(int(text), index-1, index+1, iterable)):
-                is_day_flag = 1
-        if(is_day_flag == 1):
+        if(check_if_day(int(text), index, iterable)):
             update_day(init_dict, int(text))
+            
         
 def find_the_required_params(init_dict, iterable):
     length_of_corpus = len(iterable)
@@ -129,7 +131,6 @@ def find_the_required_params(init_dict, iterable):
     init_dict['number_of_words_occur']['total_number_of_word_count'] = sum(init_dict['number_of_words_occur']['word_frequency'].values())
     return init_dict 
 
-month_names = None
 def runner_run(url_name):
     scrapped_text = scrap_it(url_name)
     init_dict = init_scrapper_info()
