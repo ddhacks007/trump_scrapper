@@ -5,8 +5,55 @@ import re
 import math
 import numpy as np
 import datetime
+import sys
+import os
+import json
+
 month_names = None
 
+json_filename = sys.argv[1]
+requested_url = sys.argv[2:][0]
+
+
+def html_to_text(html):
+    soup = BeautifulSoup(html, 'html.parser')
+    body, text = soup.body, []
+    for element in body.descendants:
+        if type(element) == NavigableString:
+            if element.parent.name in ('script', 'style'):
+                continue
+            string = ' '.join(element.string.split())
+            if string:
+                if element.parent.name == 'a':
+                    a_tag = element.parent
+                    if 'href' in a_tag:
+                        string = a_tag['href']
+                    if (    type(a_tag.previous_sibling) == NavigableString and
+                            a_tag.previous_sibling.string.strip() ):
+                        text[-1] = text[-1] + ' ' + string
+                        continue
+                elif element.previous_sibling and element.previous_sibling.name == 'a':
+                    text[-1] = text[-1] + ' ' + string
+                    continue
+                elif element.parent.name == 'p':
+                    string = '\n' + string
+                text += [string]
+    doc = '\n'.join(text)
+    return doc
+
+def make_dir(folder_name):
+    try:
+        if folder_name not in os.listdir('.'):
+            os.makedirs(folder_name+'/')
+    except OSError as e:
+            return 
+
+def save_to_json(json_filename, init_dict, directory_name = 'json_results'):
+    make_dir(directory_name)
+    with open(directory_name +'/'+json_filename+'.json', 'w') as fp:
+        json.dump(init_dict, fp)
+        print('your requested_data is successfully_stored in ', directory_name +'/'+json_filename+'.json')
+    
 def scrap_it(url_name):
     url = url_name
     html = urllib.request.urlopen(url).read().decode('utf-8')
@@ -79,9 +126,9 @@ def check_if_year(text, index, iterable, min_year_threshold = 1000, max_year_thr
         if((text[-1] == 's' and text[:-1].isdigit())):
             text = text[:-1]
         if(text.isdigit()):
-            if ( (int(text)>=min_year_threshold and int(text) <= max_year_threshold) and (month_exists(iterable, index)) ):
+            if ( (int(text)>=min_year_threshold and int(text) <= max_year_threshold) and (month_exists(iterable, index))):
                 return True
-            if (iterable[index-1] == 'in'):
+            if( text[-1] == 'in'):
                 return True
         return False
     except:
@@ -106,6 +153,10 @@ def update_day(init_dict, day):
         return
     init_dict['no_of_times_year_month_day']['day'][day] = 1
 
+def info_about_lodder(iterable_length, index):
+    if ((index/iterable_length) * 100)%10 == 0:
+        print('*******completed*****', index/iterable_length, ' %')
+    
 def calculate_params(init_dict, text, index, iterable, requested_name):
     update_word_count_index(init_dict, text)
     if(check_word_exists(text, requested_name)):
@@ -119,7 +170,6 @@ def calculate_params(init_dict, text, index, iterable, requested_name):
     if text.isdigit():
         if(check_if_day(int(text), index, iterable)):
             update_day(init_dict, int(text))
-            
         
 def find_the_required_params(init_dict, iterable, requested_name):
     length_of_corpus = len(iterable)
@@ -127,13 +177,16 @@ def find_the_required_params(init_dict, iterable, requested_name):
     for index, text in enumerate(iterable):
         text = text.replace('.', '') if (text[-1] == '.' or text[0] == '.') else text
         calculate_params(init_dict, text, index, iterable, requested_name)
+        info_about_lodder(len(iterable)-1, index)
     init_dict['number_of_words_occur']['total_number_of_word_count'] = sum(init_dict['number_of_words_occur']['word_frequency'].values())
     return init_dict 
 
 def runner_run(url_name, requested_name = 'trump'):
+    print('**************initating_runner*****************')
     scrapped_text = scrap_it(url_name)
     init_dict = init_scrapper_info()
     month_names = init_month_names()
     return find_the_required_params(init_dict, clean_text(scrapped_text.lower()), requested_name)
 
-init_dict = runner_run('https://en.wikipedia.org/wiki/Donald_Trump')
+init_dict = runner_run(requested_url)
+save_to_json(json_filename, init_dict)
