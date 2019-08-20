@@ -17,13 +17,9 @@ def init_scrapper_info():
 def clean_text(text):
     text = (re.sub(r"[^a-zA-Z0-9.]+", ' ', re.sub(r'\[.*?\]', '', text)))
     iterable = text.split(' ')
-    while(True):
-        if '' in iterable:
-            iterable.remove('')
-        elif '.' in iterable:
-            iterable.remove('.')
-        else:
-            break
+    for element in iterable:
+        if len(re.sub(r"[^a-zA-Z0-9]+", '', element)) <= 0:
+            iterable.remove(element)
     return iterable
 
 def check_word_exists(text, requested_word):
@@ -51,6 +47,16 @@ def check_if_month(text):
             return True
     return False
 
+def month_exists(iterable, index, text, threshold = 2):
+    for i in range(index-1, index-threshold-1, -1):
+        if(i>=0 and check_if_month(iterable[i])):
+            return True
+    for i in range(index+1, index+threshold+1):
+        if(i<= len(iterable)-1 and check_if_month(iterable[i])):
+            return True
+    return False
+    
+
 def update_month_names(init_dict, month_name):
     if(month_name in init_dict['no_of_times_year_month_day']['month'].keys()):
         init_dict['no_of_times_year_month_day']['month'][month_name] = init_dict['no_of_times_year_month_day']['month'][month_name] + 1
@@ -59,11 +65,17 @@ def update_month_names(init_dict, month_name):
 def number_of_digits(num):
     return math.floor(math.log(int(num), 10) + 1) if num>0 else 0
     
-def check_if_year(text, min_year_threshold= 1000, max_year_threshold = datetime.datetime.now().year + 100):
-    if text.isdigit():
-        if (int(text)>=min_year_threshold and int(text) <= max_year_threshold):
-            return True
-    return False
+def check_if_year(text, index, iterable, min_year_threshold = 1000, max_year_threshold = datetime.datetime.now().year + 100):
+    try:
+        if((text[-1] == 's' and text[:-1].isdigit())):
+            text = text[:-1]
+        if(text.isdigit()):
+            if ( (int(text)>=min_year_threshold and int(text) <= max_year_threshold) and (month_exists(iterable, index, text)) ):
+                return True
+        return False
+    except:
+        print(text, 'index', index)
+        return False
 
 def update_year(init_dict, year):
     if(year in init_dict['no_of_times_year_month_day']['year'].keys()):
@@ -71,9 +83,11 @@ def update_year(init_dict, year):
         return
     init_dict['no_of_times_year_month_day']['year'][year] = 1
 
-def check_if_day(day, previous_ptr, next_ptr):
+def check_if_day(day, previous_ptr, next_ptr, iterable):
     if day > 0 and day<=31:
-        return True if(check_if_year(next_ptr) | check_if_year(previous_ptr) | check_if_month(next_ptr) | check_if_month(previous_ptr)) else False
+        if check_if_year(iterable[next_ptr], next_ptr, iterable) | check_if_year(iterable[previous_ptr], previous_ptr, iterable) | check_if_month(iterable[next_ptr]) | check_if_month(iterable[previous_ptr]) : 
+            print(iterable[next_ptr], 'prev', iterable[previous_ptr], 'day', day)
+            return True
     return False
 
 def update_day(init_dict, day):
@@ -84,23 +98,24 @@ def update_day(init_dict, day):
 
 def calculate_params(init_dict, text, index, iterable):
     is_day_flag = 0
+    update_word_count_index(init_dict, text)
     if(check_word_exists(text, 'trump')):
         update_requested_word_index(init_dict)
-    update_word_count_index(init_dict, text)
     if(check_if_month(text)):
-            update_month_names(init_dict, text)
+        update_month_names(init_dict, text)
+        return
+    if(check_if_year(text, index, iterable)):
+        update_year(init_dict, int(text))
+        return
     if text.isdigit():
-        if(check_if_year(text)):
-            update_year(init_dict, int(text))
-            return
         if(index == 0):
-            if(check_if_day(int(text), iterable[index+1], iterable[index+2])):
+            if(check_if_day(int(text), index+1, index+2, iterable)):
                 is_day_flag = 1   
         elif(index == len(iterable) -1):
-            if(check_if_day(int(text), iterable[index-1], iterable[index-2])):
+            if(check_if_day(int(text), index-1, index-2, iterable)):
                 is_day_flag = 1
         else:
-            if(check_if_day(int(text), iterable[index-1], iterable[index+1])):
+            if(check_if_day(int(text), index-1, index+1, iterable)):
                 is_day_flag = 1
         if(is_day_flag == 1):
             update_day(init_dict, int(text))
@@ -120,5 +135,3 @@ def runner_run(url_name):
     init_dict = init_scrapper_info()
     month_names = init_month_names()
     return find_the_required_params(init_dict, clean_text(scrapped_text.lower()))
-
-init_dict = runner_run('https://en.wikipedia.org/wiki/Donald_Trump')
