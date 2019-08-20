@@ -5,7 +5,6 @@ import re
 import math
 import numpy as np
 import datetime
-
 month_names = None
 
 def scrap_it(url_name):
@@ -107,9 +106,9 @@ def update_day(init_dict, day):
         return
     init_dict['no_of_times_year_month_day']['day'][day] = 1
 
-def calculate_params(init_dict, text, index, iterable):
+def calculate_params(init_dict, text, index, iterable, requested_name):
     update_word_count_index(init_dict, text)
-    if(check_word_exists(text, 'trump')):
+    if(check_word_exists(text, requested_name)):
         update_requested_word_index(init_dict)
     if(check_if_month(text)):
         update_month_names(init_dict, text)
@@ -122,17 +121,19 @@ def calculate_params(init_dict, text, index, iterable):
             update_day(init_dict, int(text))
             
         
-def find_the_required_params(init_dict, iterable):
+def find_the_required_params(init_dict, iterable, requested_name):
     length_of_corpus = len(iterable)
     j=0
     for index, text in enumerate(iterable):
         text = text.replace('.', '') if (text[-1] == '.' or text[0] == '.') else text
-        calculate_params(init_dict, text, index, iterable)
+        calculate_params(init_dict, text, index, iterable, requested_name)
     init_dict['number_of_words_occur']['total_number_of_word_count'] = sum(init_dict['number_of_words_occur']['word_frequency'].values())
     return init_dict 
 
-def runner_run(url_name):
+def runner_run(url_name, requested_name = 'trump'):
     scrapped_text = scrap_it(url_name)
     init_dict = init_scrapper_info()
     month_names = init_month_names()
-    return find_the_required_params(init_dict, clean_text(scrapped_text.lower()))
+    return find_the_required_params(init_dict, clean_text(scrapped_text.lower()), requested_name)
+
+init_dict = runner_run('https://en.wikipedia.org/wiki/Donald_Trump')
