@@ -14,33 +14,6 @@ month_names = None
 json_filename = sys.argv[1]
 requested_url = sys.argv[2:][0]
 
-
-def html_to_text(html):
-    soup = BeautifulSoup(html, 'html.parser')
-    body, text = soup.body, []
-    for element in body.descendants:
-        if type(element) == NavigableString:
-            if element.parent.name in ('script', 'style'):
-                continue
-            string = ' '.join(element.string.split())
-            if string:
-                if element.parent.name == 'a':
-                    a_tag = element.parent
-                    if 'href' in a_tag:
-                        string = a_tag['href']
-                    if (    type(a_tag.previous_sibling) == NavigableString and
-                            a_tag.previous_sibling.string.strip() ):
-                        text[-1] = text[-1] + ' ' + string
-                        continue
-                elif element.previous_sibling and element.previous_sibling.name == 'a':
-                    text[-1] = text[-1] + ' ' + string
-                    continue
-                elif element.parent.name == 'p':
-                    string = '\n' + string
-                text += [string]
-    doc = '\n'.join(text)
-    return doc
-
 def make_dir(folder_name):
     try:
         if folder_name not in os.listdir('.'):
@@ -63,11 +36,14 @@ def init_scrapper_info():
     return {'no_of_times_the_requested_word_occurs':0, 'no_of_times_year_month_day': {'day':{}, 'month': {}, 'year': {}}, 'number_of_words_occur': {'total_number_of_word_count': 0, 'word_frequency': {} } }
 
 def clean_text(text):
-    text = (re.sub(r"[^a-zA-Z0-9.]+", ' ', re.sub(r'\[.*?\]', '', text)))
+    text = re.sub(r"[^a-zA-Z0-9.]+", ' ', re.sub(r'\[[A-Z]+\]', '', re.sub(r'\[[0-9]+\]', '', text)))
     iterable = text.split(' ')
-    for element in iterable:
-        if len(re.sub(r"[^a-zA-Z0-9]+", '', element)) <= 0:
+    for index, element in enumerate(iterable):
+        x = re.sub(r"[^a-zA-Z0-9]+", '', element)
+        if len(x) <= 0:
             iterable.remove(element)
+        else:
+            iterable[index] = element.replace('.', '') if (element[-1] == '.' or element[0] == '.') else element
     return iterable
 
 def check_word_exists(text, requested_word):
@@ -125,10 +101,10 @@ def check_if_year(text, index, iterable, min_year_threshold = 1000, max_year_thr
     try:
         if((text[-1] == 's' and text[:-1].isdigit())):
             text = text[:-1]
-        if(text.isdigit()):
-            if ( (int(text)>=min_year_threshold and int(text) <= max_year_threshold) and (month_exists(iterable, index))):
+        if(text.isdigit() and int(text)>=min_year_threshold and int(text) <= max_year_threshold):
+            if (month_exists(iterable, index)):
                 return True
-            if( text[-1] == 'in'):
+            if((iterable[index-1] in  ['the', 'in', 'year']) or iterable[index + 1] == 'elections') :
                 return True
         return False
     except:
@@ -143,6 +119,7 @@ def update_year(init_dict, year):
 
 def check_if_day(day, index, iterable):
     if day > 0 and day<=31:
+        print(day, iterable[index-1], iterable[index+1])
         if year_exists(iterable, index) | month_exists(iterable, index): 
             return True
     return False
@@ -175,7 +152,6 @@ def find_the_required_params(init_dict, iterable, requested_name):
     length_of_corpus = len(iterable)
     j=0
     for index, text in enumerate(iterable):
-        text = text.replace('.', '') if (text[-1] == '.' or text[0] == '.') else text
         calculate_params(init_dict, text, index, iterable, requested_name)
         info_about_lodder(len(iterable)-1, index)
     init_dict['number_of_words_occur']['total_number_of_word_count'] = sum(init_dict['number_of_words_occur']['word_frequency'].values())
