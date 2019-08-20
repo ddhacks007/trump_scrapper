@@ -12,7 +12,7 @@ import json
 month_names = None
 
 json_filename = sys.argv[1]
-requested_url = sys.argv[2:][0]
+requested_url = sys.argv[2][0]
 
 def make_dir(folder_name):
     try:
@@ -119,7 +119,6 @@ def update_year(init_dict, year):
 
 def check_if_day(day, index, iterable):
     if day > 0 and day<=31:
-        print(day, iterable[index-1], iterable[index+1])
         if year_exists(iterable, index) | month_exists(iterable, index): 
             return True
     return False
@@ -142,8 +141,10 @@ def calculate_params(init_dict, text, index, iterable, requested_name):
         update_month_names(init_dict, text)
         return
     if(check_if_year(text, index, iterable)):
-        update_year(init_dict, int(text))
-        return
+        if(text[-1] == 's'):
+            text = text[:-1]
+            update_year(init_dict, int(text))
+            return
     if text.isdigit():
         if(check_if_day(int(text), index, iterable)):
             update_day(init_dict, int(text))
