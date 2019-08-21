@@ -4,6 +4,7 @@ import logical_operations
 import completion_status_scrapper
 import os_operations
 import unit_testing
+import time
 
 month_names = None
 requested_url = sys.argv[1:]
@@ -42,8 +43,10 @@ def runner_run(url_name, requested_name = 'trump'):
     
 if __name__=='__main__':
     final_dict = {}
+    start = time.time()
     unit_testing.run_tests()
     for url_name in requested_url:
         init_dict = runner_run(url_name)
         final_dict[url_name] = init_dict.copy()
     os_operations.save_to_json('results', final_dict)
+    print('time taken to execute the  runner', time.time() - start, 'seconds')
