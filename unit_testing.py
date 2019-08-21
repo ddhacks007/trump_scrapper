@@ -1,7 +1,8 @@
 import unittest
 import logical_operations
-import scrapper_text
+import scrapper_preprocessor
 import json
+import uuid
 
 #testing is done with lowercase letters (all the capital letters are converted to small leters )
 def test_whether_the_word_trump_exists(test_data):
@@ -50,7 +51,7 @@ def check_the_word_count_service(test_data):
     curr_test = test_data['test_whether_the_words_are_counted']
     number_of_tests_passed = 0
     for sentence in curr_test.keys():
-        if(len(scrapper_text.clean_text(sentence)) == curr_test[sentence]):
+        if(len(scrapper_preprocessor.clean_text(sentence)) == curr_test[sentence]):
             number_of_tests_passed = number_of_tests_passed + 1
     print('the number of tests passed for the word count service ', str(number_of_tests_passed)+'/'+ str(len(curr_test.keys()) ))
     return (number_of_tests_passed, len(curr_test.keys()))

@@ -1,5 +1,5 @@
 import sys
-import scrapper_text
+import scrapper_preprocessor
 import logical_operations
 import completion_status_scrapper
 import os_operations
@@ -33,9 +33,9 @@ def runner_run(url_name, requested_name = 'trump'):
     global month_names
     print('scrapping initiated for the website', str(url_name).split('.')[1])
     month_names = logical_operations.init_month_names()
-    scrapped_text = scrapper_text.scrap_it(url_name)
-    init_dict = scrapper_text.init_scrapper_info()
-    init_dict = retrieve_information(init_dict, scrapper_text.clean_text(scrapped_text.lower()), requested_name)
+    scrapped_text = scrapper_preprocessor.scrap_it(url_name)
+    init_dict = scrapper_preprocessor.init_scrapper_info()
+    init_dict = retrieve_information(init_dict, scrapper_preprocessor.clean_text(scrapped_text.lower()), requested_name)
     print('scraping completed for the website', str(url_name).split('.')[1])
     return init_dict
     
