@@ -1,6 +1,6 @@
 # Trump_scrapper
 
-trump_scrapper is a scrapper which is used to scrap number of times the word trump occurs, number of times month, day, year and there frequency distribution in the webpage, total number of words in the webpage.
+trump_scrapper is a scrapper which is used to scrap number of times the word trump occurs, number of times (month, day, year) occurs and there frequency distribution in the webpage and finaly the total number of words in the webpage.
 
 ### Requirements
 ##### python 3
@@ -8,7 +8,7 @@ trump_scrapper is a scrapper which is used to scrap number of times the word tru
 ### steps to install
 ##### 1.) clone the repository.
 ##### 2.) install the packages in the requirements.txt.
-##### 3.) run python scrapper_runner.py.
+##### 3.) run python scrapper_runner.py by passing the urls as command line arguments shown below.
 ##### 4.) your results are dumped to the json_results directory.
 
 # Python runner
