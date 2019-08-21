@@ -12,7 +12,9 @@ import json
 month_names = None
 
 json_filename = sys.argv[1]
-requested_url = sys.argv[2][0]
+requested_url = sys.argv[2:][0]
+print(json_filename)
+print(requested_url)
 
 def make_dir(folder_name):
     try:
@@ -71,6 +73,13 @@ def check_if_month(text):
             return True
     return False
 
+def get_month_abbr(text):
+    global month_names
+    for month in month_names:
+        if text in month:
+            return month[0]
+        
+    
 def month_exists(iterable, index, threshold = 2):
     for i in range(index-1, index-threshold-1, -1):
         if(i>=0 and check_if_month(iterable[i])):
@@ -106,6 +115,7 @@ def check_if_year(text, index, iterable, min_year_threshold = 1000, max_year_thr
                 return True
             if((iterable[index-1] in  ['the', 'in', 'year']) or iterable[index + 1] == 'elections') :
                 return True
+
         return False
     except:
         print(text, 'index', index)
@@ -138,13 +148,12 @@ def calculate_params(init_dict, text, index, iterable, requested_name):
     if(check_word_exists(text, requested_name)):
         update_requested_word_index(init_dict)
     if(check_if_month(text)):
-        update_month_names(init_dict, text)
-        return
+        update_month_names(init_dict, get_month_abbr(text))
     if(check_if_year(text, index, iterable)):
         if(text[-1] == 's'):
             text = text[:-1]
-            update_year(init_dict, int(text))
-            return
+        update_year(init_dict, int(text))
+        return
     if text.isdigit():
         if(check_if_day(int(text), index, iterable)):
             update_day(init_dict, int(text))
