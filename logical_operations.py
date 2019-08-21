@@ -7,12 +7,6 @@ def check_word_exists(text, requested_word):
 
 def update_requested_word_index(init_dict):
     init_dict['no_of_times_the_requested_word_occurs'] = init_dict['no_of_times_the_requested_word_occurs'] + 1
-    
-def update_word_count_index(init_dict, text):
-    if text in init_dict['number_of_words_occur']['word_frequency'].keys():
-        init_dict['number_of_words_occur']['word_frequency'][text] = init_dict['number_of_words_occur']['word_frequency'][text] + 1
-        return 
-    init_dict['number_of_words_occur']['word_frequency'][text] = 1
 
 def init_month_names(number_of_months = 12):
     global month_names

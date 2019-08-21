@@ -11,7 +11,7 @@ def scrap_it(url_name):
         print('Network inavailable please check yoour connection !!!')
 
 def init_scrapper_info():
-    return {'no_of_times_the_requested_word_occurs':0, 'no_of_times_year_month_day': {'day':{}, 'month': {}, 'year': {}}, 'number_of_words_occur': {'total_number_of_word_count': 0, 'word_frequency': {} } }
+    return {'no_of_times_the_requested_word_occurs':0, 'no_of_times_year_month_day': {'day':{}, 'month': {}, 'year': {}}, 'total_number_of_words_occur': 0 }
 
 def clean_text(text):
     text = re.sub(r"[^a-zA-Z0-9.:]+", ' ', re.sub(r'\[[A-Z]+\]', '', re.sub(r'\[[0-9]+\]', '', text)))
