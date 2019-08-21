@@ -1,7 +1,7 @@
 import sys
 import scrapper_text
 import logical_operations
-import loader_information
+import completion_status_scrapper
 import os_operations
 import unit_testing
 
@@ -25,7 +25,7 @@ def retrieve_information(init_dict, iterable, requested_name):
     length_of_corpus = len(iterable)
     for index, text in enumerate(iterable):
         find_the_required_params(init_dict, text, index, iterable, requested_name)
-        loader_information.info_about_lodder(length_of_corpus-1, index)
+        completion_status_scrapper.completion_status(length_of_corpus-1, index)
     init_dict['total_number_of_words_occur'] = len(iterable) - 1
     return init_dict
 
