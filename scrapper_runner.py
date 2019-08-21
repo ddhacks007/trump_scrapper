@@ -48,6 +48,8 @@ def clean_text(text):
             iterable[index] = element.replace('.', '') if (element[-1] == '.' or element[0] == '.') else element
     return iterable
 
+
+#requested word is trump
 def check_word_exists(text, requested_word):
     return True if text.find(requested_word)>=0 else False
 
@@ -111,11 +113,8 @@ def check_if_year(text, index, iterable, min_year_threshold = 1000, max_year_thr
         if((text[-1] == 's' and text[:-1].isdigit())):
             text = text[:-1]
         if(text.isdigit() and int(text)>=min_year_threshold and int(text) <= max_year_threshold):
-            if (month_exists(iterable, index)):
+            if ((month_exists(iterable, index)) | ((iterable[index-1] in  ['the', 'in', 'year']) | (iterable[index + 1] == 'elections')) ) :
                 return True
-            if((iterable[index-1] in  ['the', 'in', 'year']) or iterable[index + 1] == 'elections') :
-                return True
-
         return False
     except:
         print(text, 'index', index)
@@ -141,7 +140,7 @@ def update_day(init_dict, day):
 
 def info_about_lodder(iterable_length, index):
     if ((index/iterable_length) * 100)%10 == 0:
-        print('*******completed*****', index/iterable_length, ' %')
+        print('*******completed*****', str(int((index/iterable_length)*100)) + '%')
     
 def calculate_params(init_dict, text, index, iterable, requested_name):
     update_word_count_index(init_dict, text)
@@ -174,5 +173,5 @@ def runner_run(url_name, requested_name = 'trump'):
     month_names = init_month_names()
     return find_the_required_params(init_dict, clean_text(scrapped_text.lower()), requested_name)
 
-init_dict = runner_run(requested_url)
-save_to_json(json_filename, init_dict)
+init_dict = runner_run("https://en.wikipedia.org/wiki/Donald_Trump")
+save_to_json("deepak", init_dict)
