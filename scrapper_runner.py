@@ -26,7 +26,8 @@ def retrieve_information(init_dict, iterable, requested_name):
     for index, text in enumerate(iterable):
         find_the_required_params(init_dict, text, index, iterable, requested_name)
         completion_status_scrapper.completion_status(length_of_corpus-1, index)
-    init_dict['total_number_of_words_occur'] = len(iterable) - 1
+    init_dict['total_number_of_words_occur'] = length_of_corpus
+    init_dict['total_month_year_day_occurence'] = sum(init_dict['month_year_day_occurence']['year'].values()) + sum(init_dict['month_year_day_occurence']['month'].values()) +sum(init_dict['month_year_day_occurence']['day'].values()) 
     return init_dict
 
 def runner_run(url_name, requested_name = 'trump'):

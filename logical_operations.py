@@ -44,10 +44,10 @@ def year_exists(iterable, index, threshold = 2):
     return False
 
 def update_month_names(init_dict, month_name):
-    if(month_name in init_dict['no_of_times_year_month_day']['month'].keys()):
-        init_dict['no_of_times_year_month_day']['month'][month_name] = init_dict['no_of_times_year_month_day']['month'][month_name] + 1
+    if(month_name in init_dict['month_year_day_occurence']['month'].keys()):
+        init_dict['month_year_day_occurence']['month'][month_name] = init_dict['month_year_day_occurence']['month'][month_name] + 1
         return
-    init_dict['no_of_times_year_month_day']['month'][month_name] = 1
+    init_dict['month_year_day_occurence']['month'][month_name] = 1
     
 def number_of_digits(num):
     return math.floor(math.log(int(num), 10) + 1) if num>0 else 0
@@ -69,11 +69,12 @@ def check_if_year(text, index, iterable, update=False, update_dicts={}, min_year
         print(text, 'index', index)
         return False
     
+
 def update_year(init_dict, year):
-    if(year in init_dict['no_of_times_year_month_day']['year'].keys()):
-        init_dict['no_of_times_year_month_day']['year'][year] = init_dict['no_of_times_year_month_day']['year'][year] + 1
+    if(year in init_dict['month_year_day_occurence']['year'].keys()):
+        init_dict['month_year_day_occurence']['year'][year] = init_dict['month_year_day_occurence']['year'][year] + 1
         return
-    init_dict['no_of_times_year_month_day']['year'][year] = 1
+    init_dict['month_year_day_occurence']['year'][year] = 1
     
 def day_text_extraction(text):
     if text.isdigit() :
@@ -90,7 +91,7 @@ def check_if_day(day, index, iterable):
     return False
 
 def update_day(init_dict, day):
-    if(day in init_dict['no_of_times_year_month_day']['day'].keys()):
-        init_dict['no_of_times_year_month_day']['day'][day] = init_dict['no_of_times_year_month_day']['day'][day] + 1
+    if(day in init_dict['month_year_day_occurence']['day'].keys()):
+        init_dict['month_year_day_occurence']['day'][day] = init_dict['month_year_day_occurence']['day'][day] + 1
         return
-    init_dict['no_of_times_year_month_day']['day'][day] = 1
+    init_dict['month_year_day_occurence']['day'][day] = 1
