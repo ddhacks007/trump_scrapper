@@ -173,5 +173,5 @@ def runner_run(url_name, requested_name = 'trump'):
     month_names = init_month_names()
     return find_the_required_params(init_dict, clean_text(scrapped_text.lower()), requested_name)
 
-init_dict = runner_run("https://en.wikipedia.org/wiki/Donald_Trump")
-save_to_json("deepak", init_dict)
+init_dict = runner_run(requested_url)
+save_to_json(json_filename, init_dict)
