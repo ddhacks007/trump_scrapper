@@ -3,6 +3,7 @@ import scrapper_text
 import logical_operations
 import loader_information
 import os_operations
+import unit_testing
 
 month_names = None
 json_filename = sys.argv[1]
@@ -31,6 +32,7 @@ def retrieve_information(init_dict, iterable, requested_name):
     return init_dict
 
 def runner_run(url_name, json_filename, requested_name = 'trump'):
+    unit_testing.run_tests()
     global month_names
     print('**************initating_runner*****************')
     scrapped_text = scrapper_text.scrap_it(url_name)
@@ -38,6 +40,7 @@ def runner_run(url_name, json_filename, requested_name = 'trump'):
     month_names = logical_operations.init_month_names()
     init_dict = retrieve_information(init_dict, scrapper_text.clean_text(scrapped_text.lower()), requested_name)
     os_operations.save_to_json(json_filename, init_dict)
+    
     return init_dict
     
 if __name__=='__main__':
