@@ -19,6 +19,7 @@ def init_month_names(number_of_months = 12):
     month_names = []
     for month in range(1, number_of_months+1):
         month_names.append([calendar.month_abbr[month].lower(), calendar.month_name[month].lower()])
+    return month_names
     
 def check_if_month(text, update = False, update_dict = {}):  
     global month_names
@@ -59,25 +60,36 @@ def number_of_digits(num):
     
 def check_if_year(text, index, iterable, update=False, update_dicts={}, min_year_threshold=1000, max_year_threshold = datetime.datetime.now().year + 100):
     try:
+        s_flag = 0
         if((text[-1] == 's' and text[:-1].isdigit())):
             text = text[:-1]
+            s_flag = 1
         if(text.isdigit() and int(text)>=min_year_threshold and int(text) <= max_year_threshold):
-            if ((month_exists(iterable, index)) | ((iterable[index-1] in  ['the', 'in', 'year']) | (iterable[index + 1] == 'elections')) ) :
+            if  (s_flag == 1) or (month_exists(iterable, index)) or (index >0 and iterable[index-1] in  ['in', 'year', 'by']) or (index<len(iterable)-1 and iterable[index + 1].find('election')>=0 ) :
                 if(update):
                     update_year(update_dicts, text)
                 return True
         return False
     except:
+        raise
         print(text, 'index', index)
         return False
-
+    
 def update_year(init_dict, year):
     if(year in init_dict['no_of_times_year_month_day']['year'].keys()):
         init_dict['no_of_times_year_month_day']['year'][year] = init_dict['no_of_times_year_month_day']['year'][year] + 1
         return
     init_dict['no_of_times_year_month_day']['year'][year] = 1
+    
+def day_text_extraction(text):
+    if text.isdigit() :
+        return text
+    elif(text[-2:] in ['th', 'rd', 'nd', 'st']):
+        return text[:-2]
+    return ''
 
 def check_if_day(day, index, iterable):
+    day = int(day)
     if day > 0 and day<=31:
         if year_exists(iterable, index) | month_exists(iterable, index): 
             return True
