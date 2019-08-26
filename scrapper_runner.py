@@ -5,9 +5,14 @@ import completion_status_scrapper
 import os_operations
 import unit_testing
 import time
+import spacy
+import en_core_web_sm
+import numpy as np
+
 
 month_names = None
-requested_url = sys.argv[1:]
+requested_url = sys.argv[1:][0].split(' ')
+print(requested_url)
 
 def find_the_required_params(init_dict, text, index, iterable, requested_name):
     if(logical_operations.check_word_exists(text, requested_name)):
@@ -28,16 +33,20 @@ def retrieve_information(init_dict, iterable, requested_name):
         find_the_required_params(init_dict, text, index, iterable, requested_name)
         completion_status_scrapper.completion_status(length_of_corpus-1, index)
     init_dict['total_number_of_words_occur'] = length_of_corpus
+
     init_dict['total_month_year_day_occurence'] = sum(init_dict['month_year_day_occurence']['year'].values()) + sum(init_dict['month_year_day_occurence']['month'].values()) +sum(init_dict['month_year_day_occurence']['day'].values()) 
     return init_dict
 
 def runner_run(url_name, requested_name = 'trump'):
+    nlp = en_core_web_sm.load()
     global month_names
     print('scrapping initiated for the website', str(url_name).split('.')[1])
     month_names = logical_operations.init_month_names()
     scrapped_text = scrapper_preprocessor.scrap_it(url_name)
     init_dict = scrapper_preprocessor.init_scrapper_info()
     init_dict = retrieve_information(init_dict, scrapper_preprocessor.clean_text(scrapped_text.lower()), requested_name)
+    doc = nlp(scrapped_text)
+    init_dict['day_month_year_pattern'] = '[' + ','.join([str(x) for x in (list(np.array(doc.ents)[np.array(([X.label_ for X in doc.ents])) == 'DATE']))]) +']'
     print('scraping completed for the website', str(url_name).split('.')[1])
     return init_dict
     
